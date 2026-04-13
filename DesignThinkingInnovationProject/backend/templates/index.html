@@ -1,0 +1,203 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="hero">
+  <div class="hero-copy">
+    <div class="eyebrow">TrustCheck 2.0</div>
+    <h1>Hybrid fake review detection with NLP, reviewer metadata, and API-ready analysis.</h1>
+    <p>
+      This version moves past plain sentiment analysis. It combines semantic cues,
+      sequential writing patterns, and reviewer behavior signals such as velocity,
+      verified purchase status, account age, and sentiment-rating mismatch.
+    </p>
+    <div class="hero-metrics">
+      <div class="metric-chip">
+        <span>Total analyses</span>
+        <strong>{{ dashboard_summary["total_reviews"] or 0 }}</strong>
+      </div>
+      <div class="metric-chip">
+        <span>Suspicious reviews</span>
+        <strong>{{ dashboard_summary["suspicious_reviews"] or 0 }}</strong>
+      </div>
+      <div class="metric-chip">
+        <span>Average trust</span>
+        <strong>{{ dashboard_summary["average_trust_score"] or 0 }}</strong>
+      </div>
+    </div>
+  </div>
+  <aside class="hero-panel">
+    <h3>Trust signals</h3>
+    <ul>
+      <li>Sentiment gap between rating and language</li>
+      <li>Reviewer velocity and account freshness</li>
+      <li>Marketing-heavy wording and repetition</li>
+      <li>Optional URL-based review ingestion</li>
+    </ul>
+  </aside>
+</section>
+
+<section class="grid-two">
+  <article class="panel">
+    <div class="panel-head">
+      <h2>Manual Review Check</h2>
+      <p>Paste a review using Amazon-style fields and include the metadata you know.</p>
+    </div>
+    <form class="form-grid" method="post" action="/analyze">
+      <label>
+        ASIN
+        <input name="asin" value="B0TCHECK01" required />
+      </label>
+      <label>
+        Parent ASIN
+        <input name="parent_asin" value="PARENT-TCHECK-01" required />
+      </label>
+      <label>
+        User ID
+        <input name="user_id" value="guest-user" required />
+      </label>
+      <label>
+        Rating
+        <input name="rating" type="number" min="1" max="5" value="4" required />
+      </label>
+      <label>
+        Helpful Votes
+        <input name="helpful_vote" type="number" min="0" value="3" required />
+      </label>
+      <label>
+        Unix Timestamp
+        <input name="timestamp" type="number" min="0" value="1712707200" required />
+      </label>
+      <label>
+        Account age (days)
+        <input name="account_age_days" type="number" min="0" value="120" required />
+      </label>
+      <label>
+        Reviews in last 24h
+        <input name="review_count_last_24h" type="number" min="0" value="1" required />
+      </label>
+      <label class="wide">
+        Product URL
+        <input name="product_url" placeholder="https://www.amazon.com/dp/B0TCHECK01" />
+      </label>
+      <label class="checkbox-row">
+        <input type="checkbox" name="verified_purchase" checked />
+        <span>Verified purchase</span>
+      </label>
+      <label class="wide">
+        Review title
+        <input name="title" value="Battery life is decent" />
+      </label>
+      <label class="wide">
+        Review text
+        <textarea name="text" rows="6" required>Battery life is decent, setup was easy, and the build feels solid for this price.</textarea>
+      </label>
+      <button type="submit">Analyze review</button>
+    </form>
+  </article>
+
+  <article class="panel">
+    <div class="panel-head">
+      <h2>URL Review Ingestion</h2>
+      <p>
+        Plug in a product URL and TrustCheck will fetch a small review set through the configured
+        scraper integration. If no API key is configured, demo mode still works for presentation.
+      </p>
+    </div>
+    <form class="form-stack" method="post" action="/analyze-url">
+      <label>
+        Product URL
+        <input name="product_url" value="https://demo.store/products/P1001" required />
+      </label>
+      <label>
+        Max reviews
+        <input name="max_reviews" type="number" min="1" max="20" value="5" required />
+      </label>
+      <button type="submit">Fetch and analyze</button>
+    </form>
+
+    <div class="note-card">
+      <h3>Deep model path</h3>
+      <p>
+        The running demo uses a fusion baseline for local reliability, but the codebase also includes a
+        real hybrid deep architecture with Transformer + BiLSTM + tabular feature fusion for larger training runs.
+      </p>
+    </div>
+  </article>
+</section>
+
+<section class="grid-two">
+  <article class="panel">
+    <div class="panel-head">
+      <h2>Upload Your Own CSV</h2>
+      <p>
+        Upload a batch of reviews using the Amazon-style review format. TrustCheck will validate the
+        file, run NLP analysis for each row, and store both the raw review and the linked analysis.
+      </p>
+    </div>
+    <form class="form-stack" method="post" action="/upload-csv" enctype="multipart/form-data">
+      <label>
+        Choose CSV file
+        <input type="file" name="review_csv" accept=".csv" required />
+      </label>
+      <button type="submit">Upload and analyze</button>
+    </form>
+  </article>
+
+  <article class="panel">
+    <div class="panel-head">
+      <h2>CSV Format Instructions</h2>
+      <p>Use the template below or match the exact headers in the same order.</p>
+    </div>
+    <div class="instruction-card">
+      <p><strong>Required columns</strong></p>
+      <code class="inline-block">rating,title,text,images,asin,parent_asin,user_id,timestamp,verified_purchase,helpful_vote,product_url,account_age_days,review_count_last_24h</code>
+      <p><strong>Notes</strong></p>
+      <ul class="signal-list">
+        <li>`images` can be `[]` or pipe-separated URLs like `img1|img2`.</li>
+        <li>`timestamp` should be a Unix timestamp in seconds.</li>
+        <li>`verified_purchase` accepts `1/0`, `true/false`, or `yes/no`.</li>
+        <li>`account_age_days` and `review_count_last_24h` are TrustCheck metadata fields used in fraud scoring.</li>
+      </ul>
+      <p>
+        Template file:
+        <a href="{{ request.url_for('static', path='amazon_upload_template.csv') }}">download sample CSV</a>
+      </p>
+    </div>
+  </article>
+</section>
+
+<section class="panel">
+  <div class="panel-head">
+    <h2>Recent Analysis History</h2>
+    <p>Latest runs stored in the local TrustCheck database.</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Reviewer</th>
+          <th>Rating</th>
+          <th>Label</th>
+          <th>Trust</th>
+          <th>Source</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in recent_reviews %}
+        <tr>
+          <td>{{ row["asin"] }}</td>
+          <td>{{ row["user_id"] }}</td>
+          <td>{{ row["rating"] }}</td>
+          <td>
+            <span class="pill {{ row['predicted_label'] }}">{{ row["predicted_label"] }}</span>
+          </td>
+          <td>{{ "%.3f"|format(row["trust_score"] or 0) }}</td>
+          <td>{{ row["source_mode"] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

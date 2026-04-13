@@ -1,0 +1,14 @@
+{
+  "model_version": "trustcheck-2.0",
+  "runtime_mode": "fusion-fallback",
+  "metrics": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0,
+    "runtime_mode": "fusion-fallback"
+  },
+  "deep_stack_available": true,
+  "deep_checkpoint_present": false,
+  "dataset_path": "/Users/aravwahi/Bennett University/designtipro/backend/data/sample_reviews.csv"
+}

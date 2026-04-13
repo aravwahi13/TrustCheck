@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="hero compact">
+  <div class="hero-copy">
+    <div class="eyebrow">Operational View</div>
+    <h1>Dashboard</h1>
+    <p>Quick health snapshot of the analyses stored by TrustCheck 2.0.</p>
+  </div>
+</section>
+
+<section class="stats-grid">
+  <article class="stat-card">
+    <span>Total reviews</span>
+    <strong>{{ summary["total_reviews"] or 0 }}</strong>
+  </article>
+  <article class="stat-card">
+    <span>Suspicious reviews</span>
+    <strong>{{ summary["suspicious_reviews"] or 0 }}</strong>
+  </article>
+  <article class="stat-card">
+    <span>Average trust</span>
+    <strong>{{ summary["average_trust_score"] or 0 }}</strong>
+  </article>
+  <article class="stat-card">
+    <span>Verified share</span>
+    <strong>{{ summary["verified_purchase_share"] or 0 }}</strong>
+  </article>
+</section>
+
+<section class="panel">
+  <div class="panel-head">
+    <h2>Highest-Risk Stored Reviews</h2>
+    <p>Entries ordered by anomaly score.</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Reviewer</th>
+          <th>Rating</th>
+          <th>Label</th>
+          <th>Trust</th>
+          <th>Review</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in risky_rows %}
+        <tr>
+          <td>{{ row["asin"] }}</td>
+          <td>{{ row["user_id"] }}</td>
+          <td>{{ row["rating"] }}</td>
+          <td><span class="pill {{ row['predicted_label'] }}">{{ row["predicted_label"] }}</span></td>
+          <td>{{ "%.3f"|format(row["trust_score"] or 0) }}</td>
+          <td>{{ row["text"][:90] }}{% if row["text"]|length > 90 %}...{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

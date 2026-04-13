@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="hero compact">
+  <div class="hero-copy">
+    <div class="eyebrow">Analysis Result</div>
+    <h1>Review {{ record_id }} was classified as {{ analysis["label"] }}.</h1>
+    <p>
+      Trust score: <strong>{{ "%.3f"|format(analysis["trust_score"]) }}</strong>
+      • Anomaly score: <strong>{{ "%.3f"|format(analysis["anomaly_score"]) }}</strong>
+      • Runtime: <strong>{{ analysis["runtime_mode"] }}</strong>
+    </p>
+  </div>
+</section>
+
+<section class="grid-two">
+  <article class="panel">
+    <div class="panel-head">
+      <h2>Submitted Review</h2>
+      <p>Metadata captured from the form submission.</p>
+    </div>
+    <div class="detail-grid">
+      <div><span>ASIN</span><strong>{{ payload["asin"] }}</strong></div>
+      <div><span>User</span><strong>{{ payload["user_id"] }}</strong></div>
+      <div><span>Rating</span><strong>{{ payload["rating"] }}</strong></div>
+      <div><span>Verified</span><strong>{{ payload["verified_purchase"] }}</strong></div>
+    </div>
+    <blockquote><strong>{{ payload["title"] }}</strong><br />{{ payload["text"] }}</blockquote>
+  </article>
+
+  <article class="panel">
+    <div class="panel-head">
+      <h2>Model Signals</h2>
+      <p>Why the engine leaned in this direction.</p>
+    </div>
+    <ul class="signal-list">
+      {% for signal in analysis["key_signals"] %}
+      <li>{{ signal }}</li>
+      {% endfor %}
+    </ul>
+  </article>
+</section>
+
+<section class="panel">
+  <div class="panel-head">
+    <h2>Derived NLP Features</h2>
+    <p>Hand-engineered values used alongside text semantics.</p>
+  </div>
+  <div class="feature-grid">
+    {% for key, value in analysis["derived_features"].items() %}
+    {% if key not in ["clean_text", "predicted_label"] %}
+    <div class="feature-tile">
+      <span>{{ key.replace("_", " ") }}</span>
+      <strong>{{ value }}</strong>
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

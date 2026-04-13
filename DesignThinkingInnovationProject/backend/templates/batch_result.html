@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="hero compact">
+  <div class="hero-copy">
+    <div class="eyebrow">URL Analysis</div>
+    <h1>Fetched {{ fetched_count }} reviews from the provided product URL.</h1>
+    <p>
+      Source mode: <strong>{{ source_mode }}</strong>
+      • Suspicious reviews: <strong>{{ suspicious_count }}</strong>
+      • Average trust score: <strong>{{ average_trust_score }}</strong>
+    </p>
+    <p>{{ source_message }}</p>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-head">
+    <h2>Batch Results</h2>
+    <p>{{ product_url }}</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Reviewer</th>
+          <th>Rating</th>
+          <th>Label</th>
+          <th>Trust</th>
+          <th>Top signal</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in batch_results %}
+        <tr>
+          <td>{{ item["payload"]["asin"] }}</td>
+          <td>{{ item["payload"]["user_id"] }}</td>
+          <td>{{ item["payload"]["rating"] }}</td>
+          <td><span class="pill {{ item['analysis']['label'] }}">{{ item["analysis"]["label"] }}</span></td>
+          <td>{{ "%.3f"|format(item["analysis"]["trust_score"]) }}</td>
+          <td>{{ item["analysis"]["key_signals"][0] if item["analysis"]["key_signals"] else "No extra warning signal." }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

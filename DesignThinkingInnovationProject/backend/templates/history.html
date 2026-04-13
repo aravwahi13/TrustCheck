@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="hero compact">
+  <div class="hero-copy">
+    <div class="eyebrow">Stored Activity</div>
+    <h1>User History</h1>
+    <p>Every analysis call is persisted here so the interface can show an auditable review trail.</p>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Product</th>
+          <th>Reviewer</th>
+          <th>Rating</th>
+          <th>Verified</th>
+          <th>Velocity</th>
+          <th>Label</th>
+          <th>Trust</th>
+          <th>Mode</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in history_rows %}
+        <tr>
+          <td>{{ row["id"] }}</td>
+          <td>{{ row["asin"] }}</td>
+          <td>{{ row["user_id"] }}</td>
+          <td>{{ row["rating"] }}</td>
+          <td>{{ row["verified_purchase"] }}</td>
+          <td>{{ row["reviewer_velocity"] }}</td>
+          <td><span class="pill {{ row['predicted_label'] }}">{{ row["predicted_label"] }}</span></td>
+          <td>{{ "%.3f"|format(row["trust_score"] or 0) }}</td>
+          <td>{{ row["runtime_mode"] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
